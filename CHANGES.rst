@@ -1,7 +1,7 @@
 Changelist
 ==========
 
-0.1 (unreleased)
-----------------
+0.1 released on 2014-05-17
+--------------------------
 
- * Initial version containing ``aioxmlrpc.client``
+ * Initial version implementing ``aioxmlrpc.client``
