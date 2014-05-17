@@ -38,6 +38,10 @@ This example show how to print the current version of the Gandi XML-RPC api.
 
 ::
 
+    import asyncio
+    from aioxmlrpc.client import ServerProxy
+
+
     @asyncio.coroutine
     def print_gandi_api_version():
         api = ServerProxy('https://rpc.gandi.net/xmlrpc/')
