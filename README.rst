@@ -30,7 +30,7 @@ Installation
     pip install aioxmlrpc
 
 
-Exemple of usage
+Example of usage
 ----------------
 
 This example show how to print the current version of the Gandi XML-RPC api.
