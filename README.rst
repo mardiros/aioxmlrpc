@@ -36,7 +36,6 @@ This example show how to print the current version of the Gandi xml-rpc api.
 
     @asyncio.coroutine
     def print_gandi_api_version():
-        key = 'ytHDpLGToNn9JFqtp4PLIeHB'
         api = ServerProxy('https://rpc.gandi.net/xmlrpc/')
         result = yield from api.version.info()
         print(result)
