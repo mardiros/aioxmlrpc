@@ -1,3 +1,11 @@
+"""
+XML-RPC Client with asyncio.
+
+This module adapt the ``xmlrpc.client`` module of the standard library to
+work with asyncio.
+
+"""
+
 import asyncio
 import logging
 from xmlrpc import client as xmlrpc
@@ -31,8 +39,11 @@ class _Method:
 
 
 class AioTransport(xmlrpc.Transport):
-    # change our user agent to reflect Requests
-    user_agent = "python/aioxmlrpc"
+    """
+    ``xmlrpc.Transport`` subclass for asyncio support
+    """
+
+    user_agent = 'python/aioxmlrpc'
     
 
     def __init__(self, use_https, use_datetime=False,
@@ -44,7 +55,8 @@ class AioTransport(xmlrpc.Transport):
     @asyncio.coroutine
     def request(self, host, handler, request_body, verbose):
         """
-        Make an xmlrpc request.
+        Send the XML-RPC request, return the response.
+        This method is a coroutine.
         """
         headers = {'User-Agent': self.user_agent,
                    #Proxy-Connection': 'Keep-Alive',
@@ -88,17 +100,20 @@ class AioTransport(xmlrpc.Transport):
 
 
 class ServerProxy(xmlrpc.ServerProxy):
+    """
+    ``xmlrpc.ServerProxy`` subclass for asyncio support
+    """
 
-    def __init__(self, uri, encoding=None, verbose=False,
+    def __init__(self, uri, transport=None, encoding=None, verbose=False,
                  allow_none=False, use_datetime=False,use_builtin_types=False):
-        transport = AioTransport(uri.startswith('https://'))
+        if not transport:
+            transport = AioTransport(uri.startswith('https://'))
         super().__init__(uri, transport, encoding, verbose, allow_none,
                          use_datetime, use_builtin_types)
 
     @asyncio.coroutine
     def __request(self, methodname, params):
         # call a method on the remote server
-
         request = xmlrpc.dumps(params, methodname, encoding=self.__encoding,
                                allow_none=self.__allow_none).encode(self.__encoding)
 
