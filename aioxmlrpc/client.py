@@ -1,0 +1,133 @@
+import asyncio
+import logging
+from xmlrpc import client as xmlrpc
+
+import aiohttp
+
+
+__ALL__ = ['ServerProxy', 'Fault', 'ProtocolError']
+
+# you don't have to import xmlrpc.client from your code
+Fault = xmlrpc.Fault
+ProtocolError = xmlrpc.ProtocolError
+
+log = logging.getLogger(__name__)
+
+
+class _Method:
+    # some magic to bind an XML-RPC method to an RPC server.
+    # supports "nested" methods (e.g. examples.getStateName)
+    def __init__(self, send, name):
+        self.__send = send
+        self.__name = name
+
+    def __getattr__(self, name):
+        return _Method(self.__send, "%s.%s" % (self.__name, name))
+
+    @asyncio.coroutine
+    def __call__(self, *args):
+        ret = yield from self.__send(self.__name, args)
+        return ret
+
+
+class AioTransport(xmlrpc.Transport):
+    # change our user agent to reflect Requests
+    user_agent = "python/aioxmlrpc"
+    
+
+    def __init__(self, use_https, use_datetime=False,
+                 use_builtin_types=False):
+        super().__init__(use_datetime, use_builtin_types)
+        self.use_https = use_https
+
+
+    @asyncio.coroutine
+    def request(self, host, handler, request_body, verbose):
+        """
+        Make an xmlrpc request.
+        """
+        headers = {'User-Agent': self.user_agent,
+                   #Proxy-Connection': 'Keep-Alive',
+                   #'Content-Range': 'bytes oxy1.0/-1',
+                   'Accept': 'text/xml',
+                   'Content-Type': 'text/xml' }
+        url = self._build_url(host, handler)
+        response = None
+        try:
+            response = yield from aiohttp.request('POST', url,
+                                                  headers=headers,
+                                                  data=request_body)
+            body = yield from response.read_and_close()
+            if response.status != 200:
+                raise ProtocolError(url, response.status,
+                                    body, response.headers)
+        except ProtocolError:
+            raise
+        except Exception as exc:
+            log.error('Unexpected error', exc_info=True)
+            raise ProtocolError(url, response.status,
+                                str(exc), response.headers)
+        return self.parse_response(body)
+
+    def parse_response(self, body):
+        """
+        Parse the xmlrpc response.
+        """
+        p, u = self.getparser()
+        p.feed(body)
+        p.close()
+        return u.close()
+
+    def _build_url(self, host, handler):
+        """
+        Build a url for our request based on the host, handler and use_http
+        property
+        """
+        scheme = 'https' if self.use_https else 'http'
+        return '%s://%s%s' % (scheme, host, handler)
+
+
+class ServerProxy(xmlrpc.ServerProxy):
+
+    def __init__(self, uri, encoding=None, verbose=False,
+                 allow_none=False, use_datetime=False,use_builtin_types=False):
+        transport = AioTransport(uri.startswith('https://'))
+        super().__init__(uri, transport, encoding, verbose, allow_none,
+                         use_datetime, use_builtin_types)
+
+    @asyncio.coroutine
+    def __request(self, methodname, params):
+        # call a method on the remote server
+
+        request = xmlrpc.dumps(params, methodname, encoding=self.__encoding,
+                               allow_none=self.__allow_none).encode(self.__encoding)
+
+        response = yield from self.__transport.request(
+            self.__host,
+            self.__handler,
+            request,
+            verbose=self.__verbose
+            )
+
+        if len(response) == 1:
+            response = response[0]
+
+        return response
+
+    def __getattr__(self, name):
+        return _Method(self.__request, name)
+
+
+@asyncio.coroutine
+def main():
+    print('Which version of api')
+    key = 'ytHDpLGToNn9JFqtp4PLIeHB'
+    api = ServerProxy('https://rpc.gandi.net/xmlrpc/')
+    result = yield from api.version.info()
+    print (result)
+
+
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+    loop.stop()
