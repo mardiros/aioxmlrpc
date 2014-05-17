@@ -116,18 +116,3 @@ class ServerProxy(xmlrpc.ServerProxy):
 
     def __getattr__(self, name):
         return _Method(self.__request, name)
-
-
-@asyncio.coroutine
-def main():
-    print('Which version of api')
-    key = 'ytHDpLGToNn9JFqtp4PLIeHB'
-    api = ServerProxy('https://rpc.gandi.net/xmlrpc/')
-    result = yield from api.version.info()
-    print (result)
-
-
-if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
-    loop.stop()
