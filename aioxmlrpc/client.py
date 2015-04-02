@@ -45,12 +45,12 @@ class AioTransport(xmlrpc.Transport):
 
     user_agent = 'python/aioxmlrpc'
 
-
-    def __init__(self, use_https, use_datetime=False,
-                 use_builtin_types=False):
+    def __init__(self, use_https, *, use_datetime=False,
+                 use_builtin_types=False, loop):
         super().__init__(use_datetime, use_builtin_types)
         self.use_https = use_https
-
+        self._loop = loop
+        self._connector = aiohttp.TCPConnector(loop=self._loop)
 
     @asyncio.coroutine
     def request(self, host, handler, request_body, verbose):
@@ -66,9 +66,9 @@ class AioTransport(xmlrpc.Transport):
         url = self._build_url(host, handler)
         response = None
         try:
-            response = yield from aiohttp.request('POST', url,
-                                                  headers=headers,
-                                                  data=request_body)
+            response = yield from aiohttp.request(
+                'POST', url, headers=headers, data=request_body,
+                connector=self._connector, loop=self._loop)
             body = yield from response.read_and_close()
             if response.status != 200:
                 raise ProtocolError(url, response.status,
@@ -105,9 +105,12 @@ class ServerProxy(xmlrpc.ServerProxy):
     """
 
     def __init__(self, uri, transport=None, encoding=None, verbose=False,
-                 allow_none=False, use_datetime=False,use_builtin_types=False):
+                 allow_none=False, use_datetime=False,use_builtin_types=False,
+                 loop=None):
+        self._loop = loop or asyncio.get_event_loop()
         if not transport:
-            transport = AioTransport(uri.startswith('https://'))
+            transport = AioTransport(uri.startswith('https://'),
+                                     loop=self._loop)
         super().__init__(uri, transport, encoding, verbose, allow_none,
                          use_datetime, use_builtin_types)
 
