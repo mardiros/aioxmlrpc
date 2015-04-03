@@ -84,6 +84,7 @@ class ServerProxyTestCase(TestCase):
             client.name.space.proxfyiedcall()
             )
         self.assertEqual(response, 1)
+        self.assertIs(self.loop, client._loop)
 
     def test_xmlrpc_fault(self):
         from aioxmlrpc.client import ServerProxy, Fault
@@ -101,3 +102,14 @@ class ServerProxyTestCase(TestCase):
                           self.loop.run_until_complete,
                           client.name.space.proxfyiedcall()
                           )
+
+    def test_xmlrpc_ok_gloabal_loop(self):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        from aioxmlrpc.client import ServerProxy
+        client = ServerProxy('http://localhost/test_xmlrpc_ok')
+        response = self.loop.run_until_complete(
+            client.name.space.proxfyiedcall()
+            )
+        self.assertIs(loop, client._loop)
+        self.assertEqual(response, 1)
