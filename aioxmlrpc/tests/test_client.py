@@ -55,7 +55,7 @@ def dummy_response(method, url, **kwargs):
             self.headers = {}
 
         @asyncio.coroutine
-        def read_and_close(self):
+        def text(self):
             return self.body
 
     return Response()
