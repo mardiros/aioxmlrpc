@@ -69,7 +69,7 @@ class AioTransport(xmlrpc.Transport):
             response = yield from aiohttp.request(
                 'POST', url, headers=headers, data=request_body,
                 connector=self._connector, loop=self._loop)
-            body = yield from response.read_and_close()
+            body = yield from response.text()
             if response.status != 200:
                 raise ProtocolError(url, response.status,
                                     body, response.headers)
