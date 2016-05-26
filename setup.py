@@ -20,7 +20,7 @@ with open(os.path.join(here, NAME, '__init__.py')) as version:
                          re.S).match(version.read()).group(1)
 
 
-requires = ['aiohttp']
+requires = ['aiohttp >= 0.20']
 if py_version < (3, 4):
     requires.append('asyncio')
 
