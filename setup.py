@@ -27,12 +27,13 @@ if py_version < (3, 4):
 
 setup(name=NAME,
       version=VERSION,
-      description='XML-RPC for asyncio',
+      description='XML-RPC client for asyncio',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[
           'Programming Language :: Python',
           'Programming Language :: Python :: 3.3',
           'Programming Language :: Python :: 3.4',
+          'Programming Language :: Python :: 3.5',
           'Environment :: Web Environment',
           'Intended Audience :: Developers',
           'License :: OSI Approved :: BSD License'
