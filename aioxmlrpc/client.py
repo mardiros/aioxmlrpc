@@ -98,6 +98,9 @@ class AioTransport(xmlrpc.Transport):
         scheme = 'https' if self.use_https else 'http'
         return '%s://%s%s' % (scheme, host, handler)
 
+    def close(self):
+    	self._connector.close()
+
 
 class ServerProxy(xmlrpc.ServerProxy):
     """
@@ -131,6 +134,9 @@ class ServerProxy(xmlrpc.ServerProxy):
             response = response[0]
 
         return response
+
+    def close(self):
+    	self.__transport.close()
 
     def __getattr__(self, name):
         return _Method(self.__request, name)
