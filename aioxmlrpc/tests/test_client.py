@@ -113,3 +113,18 @@ class ServerProxyTestCase(TestCase):
             )
         self.assertIs(loop, client._loop)
         self.assertEqual(response, 1)
+
+    def test_close_transport(self):
+      from aioxmlrpc.client import ServerProxy, AioTransport
+
+      transp = AioTransport(use_https=False, loop=self.loop)
+      transp._connector.close = mock.Mock()
+      client = ServerProxy('http://localhost/test_xmlrpc_ok',
+                           loop=self.loop, transport=transp)
+      response = self.loop.run_until_complete(
+          client.name.space.proxfyiedcall()
+      )
+      client.close()
+      self.assertEqual(response, 1)
+      self.assertIs(self.loop, client._loop)
+      self.assertTrue(transp._connector.close.called)
