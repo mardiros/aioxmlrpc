@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.3 released on 2016-06-16
+--------------------------
+
+ * Fix socket closing issue
+
 
 0.2 released on 2016-05-26
 --------------------------
