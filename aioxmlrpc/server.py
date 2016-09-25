@@ -8,7 +8,7 @@ work with asyncio.
 
 import asyncio
 import aiohttp.server
-from xmlrpc import server as xmlrpc
+from xmlrpc.client import gzip_decode
 
 
 class SimpleXMLRPCRequestHandler(aiohttp.server.ServerHttpProtocol):
@@ -51,6 +51,11 @@ class SimpleXMLRPCRequestHandler(aiohttp.server.ServerHttpProtocol):
             return
 
         data = yield from payload.read()
+
+        # handle gzip encoding
+        encoding = self.headers.get("content-encoding", "identity").lower()
+
+
         xml = self._dispatcher._marshaled_dispatch(data, path=message.path)
         response = aiohttp.Response(
             self.writer, 200, http_version=message.version
@@ -60,3 +65,20 @@ class SimpleXMLRPCRequestHandler(aiohttp.server.ServerHttpProtocol):
         response.send_headers()
         response.write(xml)
         yield from response.write_eof()
+
+    @asyncio.coroutine
+    def decode_request_content(self, message, payload):
+        data = yield from payload.read()
+        encoding = message.headers.get("content-encoding", "indentity").lower()
+
+        if encoding == "identity":
+            return data
+        elif encoding == "gzip":
+            try:
+                data = gzip_decode(data)
+            except NotImplementedError:
+                # error 501
+                pass
+            except ValueError:
+                # error 400
+                pass
