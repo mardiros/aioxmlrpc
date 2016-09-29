@@ -7,11 +7,13 @@ work with asyncio.
 """
 
 import asyncio
-import aiohttp.server
+import aiohttp
+from aiohttp.server import ServerHttpProtocol
 from xmlrpc.client import gzip_decode
+from xmlrpc.server import SimpleXMLRPCDispatcher
 
 
-class SimpleXMLRPCRequestHandler(aiohttp.server.ServerHttpProtocol):
+class SimpleXMLRPCRequestHandler(ServerHttpProtocol):
     """
     Simple XMLRPC Request handler compatible with low layer of aiohttp
     """
@@ -32,39 +34,20 @@ class SimpleXMLRPCRequestHandler(aiohttp.server.ServerHttpProtocol):
             return True
 
     @asyncio.coroutine
-    def report_404(self, message):
-        text = b'No such page'
-        response = aiohttp.Response(
-            self.writer, 404, http_version=message.version
-        )
-        response.add_header("Content-type", "text/plain")
-        response.add_header("Content-length", str(len(text)))
-        response.send_headers()
-        response.write(text)
-        yield from response.write_eof()
-
-    @asyncio.coroutine
     def handle_request(self, message, payload):
 
         if not self.is_rpc_path_valid(message.path):
-            yield from self.report_404()
+            yield from self.send_404(message.version)
             return
 
-        data = yield from payload.read()
+        # retrieve data
+        data = yield from self.decode_request_content()
 
-        # handle gzip encoding
-        encoding = self.headers.get("content-encoding", "identity").lower()
-
-
+        # call RPC
         xml = self._dispatcher._marshaled_dispatch(data, path=message.path)
-        response = aiohttp.Response(
-            self.writer, 200, http_version=message.version
-        )
-        response.add_header("Content-type", "text/xml")
-        response.add_header("Content-length", str(len(xml)))
-        response.send_headers()
-        response.write(xml)
-        yield from response.write_eof()
+
+        # send response
+        yield from self.send_response(200, message.version, xml)
 
     @asyncio.coroutine
     def decode_request_content(self, message, payload):
@@ -75,10 +58,26 @@ class SimpleXMLRPCRequestHandler(aiohttp.server.ServerHttpProtocol):
             return data
         elif encoding == "gzip":
             try:
-                data = gzip_decode(data)
+                return gzip_decode(data)
             except NotImplementedError:
-                # error 501
-                pass
+                yield from self.send_response(501, message.version)
             except ValueError:
-                # error 400
-                pass
+                yield from self.send_response(400, message.version)
+
+    @asyncio.coroutine
+    def send_response(self, code, version, text=b""):
+        response = aiohttp.Response(
+            self.writer, code, http_version=version
+        )
+        response.add_header("Content-type", "text/xml")
+        response.add_header("Content-length", str(len(text)))
+        response.send_headers()
+        response.write(text)
+        yield from response.write_eof()
+
+    @asyncio.coroutine
+    def send_404(self, version):
+        yield from self.send_response(404, version, b"No such page")
+
+class SimpleXMLRPCServer:
+    pass
