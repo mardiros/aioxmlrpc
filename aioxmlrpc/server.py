@@ -8,9 +8,13 @@ work with asyncio.
 
 import asyncio
 import aiohttp
+import xmlrpc.server
 from aiohttp.server import ServerHttpProtocol
 from xmlrpc.client import gzip_decode
-from xmlrpc.server import SimpleXMLRPCDispatcher
+
+__ALL__ = ['SimpleXMLRPCRequestHandler', 'SimpleXMLRPCDispatcher']
+
+SimpleXMLRPCDispatcher = xmlrpc.server.SimpleXMLRPCDispatcher
 
 
 class SimpleXMLRPCRequestHandler(ServerHttpProtocol):
@@ -41,7 +45,7 @@ class SimpleXMLRPCRequestHandler(ServerHttpProtocol):
             return
 
         # retrieve data
-        data = yield from self.decode_request_content()
+        data = yield from self.decode_request_content(message, payload)
 
         # call RPC
         xml = self._dispatcher._marshaled_dispatch(data, path=message.path)
@@ -78,6 +82,3 @@ class SimpleXMLRPCRequestHandler(ServerHttpProtocol):
     @asyncio.coroutine
     def send_404(self, version):
         yield from self.send_response(404, version, b"No such page")
-
-class SimpleXMLRPCServer:
-    pass

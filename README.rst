@@ -52,3 +52,17 @@ This example show how to print the current version of the Gandi XML-RPC api.
         loop = asyncio.get_event_loop()
         loop.run_until_complete(print_gandi_api_version())
         loop.stop()
+
+
+Exemple of usage
+----------------
+
+This exemple show an exemple of the server side.
+
+
+::
+
+   import asyncio
+   from aioxmlrpc.server import SimpleXMLRPCDispatcher, SimpleXMLRPCRequestHandler
+
+   def
