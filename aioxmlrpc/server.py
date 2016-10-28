@@ -12,7 +12,7 @@ import xmlrpc.server
 from aiohttp.server import ServerHttpProtocol
 from xmlrpc.client import gzip_decode
 
-__ALL__ = ['SimpleXMLRPCRequestHandler', 'SimpleXMLRPCDispatcher']
+__ALL__ = ['SimpleXMLRPCRequestHandler', 'SimpleXMLRPCDispatcher', 'SimpleXMLRPCServer']
 
 SimpleXMLRPCDispatcher = xmlrpc.server.SimpleXMLRPCDispatcher
 
@@ -58,7 +58,7 @@ class SimpleXMLRPCRequestHandler(ServerHttpProtocol):
         data = yield from payload.read()
         encoding = message.headers.get("content-encoding", "indentity").lower()
 
-        if encoding == "identity":
+        if encoding == "indentity":
             return data
         elif encoding == "gzip":
             try:
@@ -67,6 +67,8 @@ class SimpleXMLRPCRequestHandler(ServerHttpProtocol):
                 yield from self.send_response(501, message.version)
             except ValueError:
                 yield from self.send_response(400, message.version)
+        else:
+            yield from self.send_response(501, message.version, b"encoding not supported")
 
     @asyncio.coroutine
     def send_response(self, code, version, text=b""):
@@ -82,3 +84,9 @@ class SimpleXMLRPCRequestHandler(ServerHttpProtocol):
     @asyncio.coroutine
     def send_404(self, version):
         yield from self.send_response(404, version, b"No such page")
+
+
+class SimpleXMLRPCServer(SimpleXMLRPCDispatcher):
+
+    def request_handler(self, **kwargs):
+        return SimpleXMLRPCRequestHandler(dispatcher=self, **kwargs)

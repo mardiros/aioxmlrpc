@@ -12,10 +12,8 @@ Getting Started
 
 Asyncio version of the standard lib ``xmlrpc``
 
-Currently only ``aioxmlrpc.client``, which works like ``xmlrpc.client`` but
+``aioxmlrpc.client``, which works like ``xmlrpc.client`` but
 with coroutine is implemented.
-
-Fill free to fork me if you want to implement the server part.
 
 
 ``aioxmlrpc`` is based on ``aiohttp`` for the transport, and just patch
@@ -63,6 +61,18 @@ This exemple show an exemple of the server side.
 ::
 
    import asyncio
-   from aioxmlrpc.server import SimpleXMLRPCDispatcher, SimpleXMLRPCRequestHandler
+   from aioxmlrpc.server import SimpleXMLRPCServer
 
-   def
+
+   class Api:
+       def info(self):
+           return "1.0.0"
+
+   if __name__ == "__main__":
+       server = SimpleXMLRPCServer()
+       server.register_instance(Api(), allow_dotted_names=True)
+       loop = asyncio.get_event_loop()
+       f = loop.create_server(lambda: server.request_handler(debug=True, keep_alive=75), '0.0.0.0', '8080')
+       loop.run_until_complete(f)
+       loop.run_forever()
+
