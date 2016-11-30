@@ -4,13 +4,16 @@ XML-RPC Server with asyncio.
 This module adapt the ``xmlrpc.server`` module of the standard library to
 work with asyncio.
 
+Handle RPC of classic and coroutine functions
+
 """
 
+import sys
 import asyncio
 import aiohttp
 import xmlrpc.server
 from aiohttp.server import ServerHttpProtocol
-from xmlrpc.client import gzip_decode
+from xmlrpc.client import gzip_decode, loads, dumps, Fault
 
 __ALL__ = ['SimpleXMLRPCRequestHandler', 'SimpleXMLRPCDispatcher', 'SimpleXMLRPCServer']
 
@@ -48,7 +51,7 @@ class SimpleXMLRPCRequestHandler(ServerHttpProtocol):
         data = yield from self.decode_request_content(message, payload)
 
         # call RPC
-        xml = self._dispatcher._marshaled_dispatch(data, path=message.path)
+        xml = yield from self._dispatcher._marshaled_dispatch(data, path=message.path)
 
         # send response
         yield from self.send_response(200, message.version, xml)
@@ -87,6 +90,72 @@ class SimpleXMLRPCRequestHandler(ServerHttpProtocol):
 
 
 class SimpleXMLRPCServer(SimpleXMLRPCDispatcher):
+    @asyncio.coroutine
+    def _marshaled_dispatch(self, data, path=None):
+        """
+        Override function from SimpleXMLRPCDispatcher to handle coroutines RPC case
+        """
+        try:
+            params, method = loads(data, use_builtin_types=self.use_builtin_types)
+
+            response = yield from self._dispatch(method, params)
+            # wrap response in a singleton tuple
+            response = (response,)
+            response = dumps(response, methodresponse=1,
+                             allow_none=self.allow_none, encoding=self.encoding)
+        except Fault as fault:
+            response = dumps(fault, allow_none=self.allow_none,
+                             encoding=self.encoding)
+        except:
+            # report exception back to server
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            response = dumps(
+                Fault(1, "%s:%s" % (exc_type, exc_value)),
+                encoding=self.encoding, allow_none=self.allow_none,
+                )
+
+        return response.encode(self.encoding)
+
+    @asyncio.coroutine
+    def _dispatch(self, method, params):
+        """
+        Override function from SimpleXMLRPCDispatcher to handle coroutine
+        RPC call
+        """
+        func = None
+        try:
+            # check to see if a matching function has been registered
+            func = self.funcs[method]
+        except KeyError:
+            if self.instance is not None:
+                # check for a _dispatch method
+                if hasattr(self.instance, '_dispatch'):
+                    if asyncio.iscoroutinefunction(self.instance._dispatch):
+                        return (yield from self.instance._dispatch(method, params))
+                    else:
+                        return self.instance._dispatch(method, params)
+                else:
+                    # call instance method directly
+                    try:
+                        func = xmlrpc.server.resolve_dotted_attribute(
+                            self.instance,
+                            method,
+                            self.allow_dotted_names
+                            )
+                    except AttributeError:
+                        pass
+
+        if func is not None:
+            if asyncio.iscoroutinefunction(func):
+                result = yield from func(*params)
+                return result
+            else:
+                return func(*params)
+        else:
+            raise Exception('method "%s" is not supported' % method)
 
     def request_handler(self, **kwargs):
+        """
+        Use as Request handler factory
+        """
         return SimpleXMLRPCRequestHandler(dispatcher=self, **kwargs)
