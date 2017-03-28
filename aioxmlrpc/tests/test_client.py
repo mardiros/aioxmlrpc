@@ -128,3 +128,28 @@ class ServerProxyTestCase(TestCase):
       self.assertEqual(response, 1)
       self.assertIs(self.loop, client._loop)
       self.assertTrue(transp._connector.close.called)
+
+
+@asyncio.coroutine
+def failing_request(*args, **kwargs):
+    raise OSError
+
+
+class HTTPErrorTestCase(TestCase):
+
+    def setUp(self):
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(None)
+        self.aiohttp_request = mock.patch('aiohttp.request', new=failing_request)
+        self.aiohttp_request.start()
+
+    def tearDown(self):
+        self.aiohttp_request.stop()
+
+    def test_http_error(self):
+        from aioxmlrpc.client import ServerProxy, ProtocolError
+        client = ServerProxy('http://nonexistent/nonexistent', loop=self.loop)
+        self.assertRaises(ProtocolError,
+                          self.loop.run_until_complete,
+                          client.name.space.proxfyiedcall()
+                          )

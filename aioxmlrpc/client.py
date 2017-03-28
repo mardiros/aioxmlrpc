@@ -79,8 +79,14 @@ class AioTransport(xmlrpc.Transport):
             raise
         except Exception as exc:
             log.error('Unexpected error', exc_info=True)
-            raise ProtocolError(url, response.status,
-                                str(exc), response.headers)
+            if response is not None:
+                errcode = response.status
+                headers = response.headers
+            else:
+                errcode = 0
+                headers = {}
+
+            raise ProtocolError(url, errcode, str(exc), headers)
         return self.parse_response(body)
 
     def parse_response(self, body):
