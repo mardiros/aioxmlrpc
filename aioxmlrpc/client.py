@@ -80,8 +80,8 @@ class AioTransport(xmlrpc.Transport):
         except Exception as exc:
             log.error('Unexpected error', exc_info=True)
             if response is not None:
-                errcode = response.status if response is not None else 0
-                headers = response.headers if response is not None else {}
+                errcode = response.status
+                headers = response.headers
             else:
                 errcode = 0
                 headers = {}
