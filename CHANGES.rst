@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.4 released on 2017-03-30
+--------------------------
+
+ * Fix NXDOMAIN Exception handling (Vladimir Rutsky)
+ * Fix cancel of futures handling (Gustavo Tavares Cabral)
+
 0.3 released on 2016-06-16
 --------------------------
 
