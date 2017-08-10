@@ -1,8 +1,10 @@
+import asyncio
+import aiohttp
+
 from unittest import TestCase
 from unittest import mock
 
-import asyncio
-
+from aioxmlrpc.client import ServerProxy, ProtocolError, Fault
 
 RESPONSES = {
 
@@ -15,7 +17,7 @@ RESPONSES = {
       </param>
    </params>
 </methodResponse>"""
-},
+                                        },
     'http://localhost/test_xmlrpc_fault': {'status': 200,
                                            'body': """<?xml version="1.0"?>
 <methodResponse>
@@ -35,14 +37,14 @@ RESPONSES = {
   </fault>
 </methodResponse>
 """
-},
-    'http://localhost/test_http_500':  {'status': 500,
-                                        'body': """
+                                           },
+    'http://localhost/test_http_500': {'status': 500,
+                                       'body': """
 I am really broken
 """
-}
+                                       }
 
-    }
+}
 
 
 @asyncio.coroutine
@@ -63,71 +65,88 @@ def dummy_response(method, url, **kwargs):
 
 @asyncio.coroutine
 def dummy_request(*args, **kwargs):
-    return dummy_response(*args, **kwargs)
+
+    if isinstance(args[0], aiohttp.ClientSession):
+        return dummy_response(*args[1:], **kwargs)
+    else:
+        return dummy_response(*args, **kwargs)
 
 
-class ServerProxyTestCase(TestCase):
-
+class ServerProxyWithSessionTestCase(TestCase):
     def setUp(self):
         self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(None)
-        self.aiohttp_request = mock.patch('aiohttp.request', new=dummy_request)
-        self.aiohttp_request.start()
+        asyncio.set_event_loop(self.loop)
+        self.session = aiohttp.ClientSession(loop=self.loop)
+        self.session.request = dummy_request
 
     def tearDown(self):
-        self.aiohttp_request.stop()
+        self.loop.run_until_complete(self.session.close())
 
     def test_xmlrpc_ok(self):
-        from aioxmlrpc.client import ServerProxy
-        client = ServerProxy('http://localhost/test_xmlrpc_ok', loop=self.loop)
+        client = ServerProxy('http://localhost/test_xmlrpc_ok',
+                             loop=self.loop,
+                             session=self.session)
         response = self.loop.run_until_complete(
             client.name.space.proxfyiedcall()
-            )
+        )
         self.assertEqual(response, 1)
         self.assertIs(self.loop, client._loop)
 
     def test_xmlrpc_fault(self):
-        from aioxmlrpc.client import ServerProxy, Fault
         client = ServerProxy('http://localhost/test_xmlrpc_fault',
-                             loop=self.loop)
-        self.assertRaises(Fault,
-                          self.loop.run_until_complete,
-                          client.name.space.proxfyiedcall()
-                          )
+                             loop=self.loop,
+                             session=self.session)
+
+        with self.assertRaises(Fault):
+            self.loop.run_until_complete(client.name.space.proxfyiedcall())
 
     def test_http_500(self):
-        from aioxmlrpc.client import ServerProxy, ProtocolError
-        client = ServerProxy('http://localhost/test_http_500', loop=self.loop)
-        self.assertRaises(ProtocolError,
-                          self.loop.run_until_complete,
-                          client.name.space.proxfyiedcall()
-                          )
+        client = ServerProxy('http://localhost/test_http_500',
+                             loop=self.loop,
+                             session=self.session)
+
+        with self.assertRaises(ProtocolError):
+            self.loop.run_until_complete(client.name.space.proxfyiedcall())
 
     def test_xmlrpc_ok_global_loop(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        from aioxmlrpc.client import ServerProxy
-        client = ServerProxy('http://localhost/test_xmlrpc_ok')
+        client = ServerProxy('http://localhost/test_xmlrpc_ok',
+                             session=self.session)
         response = self.loop.run_until_complete(
             client.name.space.proxfyiedcall()
-            )
-        self.assertIs(loop, client._loop)
+        )
+        self.assertIs(self.loop, client._loop)
         self.assertEqual(response, 1)
 
-    def test_close_transport(self):
-      from aioxmlrpc.client import ServerProxy, AioTransport
 
-      transp = AioTransport(use_https=False, loop=self.loop)
-      transp._connector.close = mock.Mock()
-      client = ServerProxy('http://localhost/test_xmlrpc_ok',
-                           loop=self.loop, transport=transp)
-      response = self.loop.run_until_complete(
-          client.name.space.proxfyiedcall()
-      )
-      client.close()
-      self.assertEqual(response, 1)
-      self.assertIs(self.loop, client._loop)
-      self.assertTrue(transp._connector.close.called)
+class ServerProxyWithoutSessionTestCase(TestCase):
+
+    def setUp(self):
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+
+        session_request = mock.patch('aiohttp.ClientSession.request', new=dummy_request)
+        session_request.start()
+        self.addCleanup(session_request.stop)
+
+    def test_close_session(self):
+        client = ServerProxy('http://localhost/test_xmlrpc_ok',
+                             loop=self.loop)
+        response = self.loop.run_until_complete(
+            client.name.space.proxfyiedcall()
+        )
+        self.assertEqual(response, 1)
+        self.assertIs(self.loop, client._loop)
+        self.loop.run_until_complete(client.close())
+
+    def test_contextmanager(self):
+        self.loop.run_until_complete(self.xmlrpc_with_context_manager())
+
+    async def xmlrpc_with_context_manager(self):
+        async with ServerProxy('http://localhost/test_xmlrpc_ok',
+                               loop=self.loop) as client:
+            response = await client.name.space.proxfyiedcall()
+        self.assertEqual(response, 1)
+        self.assertIs(self.loop, client._loop)
 
 
 @asyncio.coroutine
@@ -136,20 +155,16 @@ def failing_request(*args, **kwargs):
 
 
 class HTTPErrorTestCase(TestCase):
-
     def setUp(self):
         self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(None)
-        self.aiohttp_request = mock.patch('aiohttp.request', new=failing_request)
-        self.aiohttp_request.start()
+        self.session = aiohttp.ClientSession(loop=self.loop)
+        self.session.request = failing_request
 
     def tearDown(self):
-        self.aiohttp_request.stop()
+        self.loop.run_until_complete(self.session.close())
 
     def test_http_error(self):
-        from aioxmlrpc.client import ServerProxy, ProtocolError
-        client = ServerProxy('http://nonexistent/nonexistent', loop=self.loop)
-        self.assertRaises(ProtocolError,
-                          self.loop.run_until_complete,
-                          client.name.space.proxfyiedcall()
-                          )
+        client = ServerProxy('http://nonexistent/nonexistent', loop=self.loop,
+                             session=self.session)
+        with self.assertRaises(ProtocolError):
+            self.loop.run_until_complete(client.name.space.proxfyiedcall())
