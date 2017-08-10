@@ -5,12 +5,13 @@ from aioxmlrpc.client import ServerProxy
 ENDPOINT = 'https://rpc.gandi.net/xmlrpc/'
 
 
-async def main():
-
-    async with ServerProxy(ENDPOINT, allow_none=True) as client:
-        for _ in range(5):
-            data = await client.version.info()
-            print(data)
+@asyncio.coroutine
+def main():
+    client = ServerProxy(ENDPOINT, allow_none=True)
+    for _ in range(5):
+        data = yield from client.version.info()
+        print(data)
+    yield from client.close()
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()

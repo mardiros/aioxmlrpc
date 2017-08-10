@@ -162,9 +162,11 @@ class ServerProxy(xmlrpc.ServerProxy):
 
     if PY35:
 
-        async def __aenter__(self):
+        @asyncio.coroutine
+        def __aenter__(self):
             return self
 
-        async def __aexit__(self, exc_type, exc_val, exc_tb):
+        @asyncio.coroutine
+        def __aexit__(self, exc_type, exc_val, exc_tb):
             if self._close_session:
-                await self._session.close()
+                yield from self._session.close()

@@ -140,16 +140,15 @@ class ServerProxyWithoutSessionTestCase(TestCase):
         self.assertIs(self.loop, client._loop)
         self.loop.run_until_complete(client.close())
 
-    if PY35:
-        def test_contextmanager(self):
-            self.loop.run_until_complete(self.xmlrpc_with_context_manager())
-
-        async def xmlrpc_with_context_manager(self):
-            async with ServerProxy('http://localhost/test_xmlrpc_ok',
-                                   loop=self.loop) as client:
-                response = await client.name.space.proxfyiedcall()
-            self.assertEqual(response, 1)
-            self.assertIs(self.loop, client._loop)
+    # def test_contextmanager(self):
+    #     self.loop.run_until_complete(self.xmlrpc_with_context_manager())
+    #
+    # async def xmlrpc_with_context_manager(self):
+    #     async with ServerProxy('http://localhost/test_xmlrpc_ok',
+    #                            loop=self.loop) as client:
+    #         response = await client.name.space.proxfyiedcall()
+    #     self.assertEqual(response, 1)
+    #     self.assertIs(self.loop, client._loop)
 
 
 @asyncio.coroutine
