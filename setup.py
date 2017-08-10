@@ -20,7 +20,7 @@ with open(os.path.join(here, NAME, '__init__.py')) as version:
                          re.S).match(version.read()).group(1)
 
 
-requires = ['aiohttp >= 0.20']
+requires = ['aiohttp >= 1.0.0']
 if py_version < (3, 4):
     requires.append('asyncio')
 
@@ -34,6 +34,7 @@ setup(name=NAME,
           'Programming Language :: Python :: 3.3',
           'Programming Language :: Python :: 3.4',
           'Programming Language :: Python :: 3.5',
+          'Programming Language :: Python :: 3.6',
           'Environment :: Web Environment',
           'Intended Audience :: Developers',
           'License :: OSI Approved :: BSD License'

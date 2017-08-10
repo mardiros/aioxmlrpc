@@ -1,3 +1,4 @@
+import sys
 import asyncio
 import aiohttp
 
@@ -46,6 +47,7 @@ I am really broken
 
 }
 
+PY35 = sys.version_info >= (3, 5)
 
 @asyncio.coroutine
 def dummy_response(method, url, **kwargs):
@@ -138,15 +140,16 @@ class ServerProxyWithoutSessionTestCase(TestCase):
         self.assertIs(self.loop, client._loop)
         self.loop.run_until_complete(client.close())
 
-    def test_contextmanager(self):
-        self.loop.run_until_complete(self.xmlrpc_with_context_manager())
+    if PY35:
+        def test_contextmanager(self):
+            self.loop.run_until_complete(self.xmlrpc_with_context_manager())
 
-    async def xmlrpc_with_context_manager(self):
-        async with ServerProxy('http://localhost/test_xmlrpc_ok',
-                               loop=self.loop) as client:
-            response = await client.name.space.proxfyiedcall()
-        self.assertEqual(response, 1)
-        self.assertIs(self.loop, client._loop)
+        async def xmlrpc_with_context_manager(self):
+            async with ServerProxy('http://localhost/test_xmlrpc_ok',
+                                   loop=self.loop) as client:
+                response = await client.name.space.proxfyiedcall()
+            self.assertEqual(response, 1)
+            self.assertIs(self.loop, client._loop)
 
 
 @asyncio.coroutine
