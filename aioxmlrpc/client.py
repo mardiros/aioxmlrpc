@@ -45,33 +45,33 @@ class AioTransport(xmlrpc.Transport):
     ``xmlrpc.Transport`` subclass for asyncio support
     """
 
-    user_agent = 'python/aioxmlrpc'
-
     def __init__(self, session, use_https, *, use_datetime=False,
-                 use_builtin_types=False, loop):
+                 use_builtin_types=False, loop, headers=None, auth=None):
         super().__init__(use_datetime, use_builtin_types)
         self.use_https = use_https
         self._loop = loop
         self._session = session
 
-        # self._connector = aiohttp.TCPConnector(loop=self._loop)
+        self.auth = auth
+
+        if not headers:
+            headers = {'User-Agent': 'python/aioxmlrpc',
+                       'Accept': 'text/xml',
+                       'Content-Type': 'text/xml'}
+
+        self.headers = headers
 
     @asyncio.coroutine
-    def request(self, host, handler, request_body, verbose):
+    def request(self, host, handler, request_body, verbose=False):
         """
         Send the XML-RPC request, return the response.
         This method is a coroutine.
         """
-        headers = {'User-Agent': self.user_agent,
-                   #Proxy-Connection': 'Keep-Alive',
-                   #'Content-Range': 'bytes oxy1.0/-1',
-                   'Accept': 'text/xml',
-                   'Content-Type': 'text/xml'}
         url = self._build_url(host, handler)
         response = None
         try:
             response = yield from self._session.request(
-                'POST', url, headers=headers, data=request_body)
+                'POST', url, headers=self.headers, data=request_body, auth=self.auth)
             body = yield from response.text()
             if response.status != 200:
                 raise ProtocolError(url, response.status,
@@ -117,7 +117,7 @@ class ServerProxy(xmlrpc.ServerProxy):
 
     def __init__(self, uri, session=None, encoding=None, verbose=False,
                  allow_none=False, use_datetime=False, use_builtin_types=False,
-                 loop=None):
+                 loop=None, auth=None, headers=None):
         self._loop = loop or asyncio.get_event_loop()
 
         if session:
@@ -129,7 +129,9 @@ class ServerProxy(xmlrpc.ServerProxy):
 
         transport = AioTransport(use_https=uri.startswith('https://'),
                                  loop=self._loop,
-                                 session=self._session)
+                                 session=self._session,
+                                 auth=auth,
+                                 headers=headers)
 
         super().__init__(uri, transport, encoding, verbose, allow_none,
                          use_datetime, use_builtin_types)
