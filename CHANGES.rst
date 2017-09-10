@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.5 released on 2017-09-10
+--------------------------
+
+ * Remove compatibility with aiohttp < 1.0 (Ovv)
+
 0.4 released on 2017-03-30
 --------------------------
 
