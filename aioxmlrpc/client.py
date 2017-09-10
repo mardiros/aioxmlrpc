@@ -6,11 +6,12 @@ work with asyncio.
 
 """
 
+import sys
 import asyncio
 import logging
-from xmlrpc import client as xmlrpc
-
 import aiohttp
+
+from xmlrpc import client as xmlrpc
 
 
 __ALL__ = ['ServerProxy', 'Fault', 'ProtocolError']
@@ -20,6 +21,7 @@ Fault = xmlrpc.Fault
 ProtocolError = xmlrpc.ProtocolError
 
 log = logging.getLogger(__name__)
+PY35 = sys.version_info >= (3, 5)
 
 
 class _Method:
@@ -43,32 +45,33 @@ class AioTransport(xmlrpc.Transport):
     ``xmlrpc.Transport`` subclass for asyncio support
     """
 
-    user_agent = 'python/aioxmlrpc'
-
-    def __init__(self, use_https, *, use_datetime=False,
-                 use_builtin_types=False, loop):
+    def __init__(self, session, use_https, *, use_datetime=False,
+                 use_builtin_types=False, loop, headers=None, auth=None):
         super().__init__(use_datetime, use_builtin_types)
         self.use_https = use_https
         self._loop = loop
-        self._connector = aiohttp.TCPConnector(loop=self._loop)
+        self._session = session
+
+        self.auth = auth
+
+        if not headers:
+            headers = {'User-Agent': 'python/aioxmlrpc',
+                       'Accept': 'text/xml',
+                       'Content-Type': 'text/xml'}
+
+        self.headers = headers
 
     @asyncio.coroutine
-    def request(self, host, handler, request_body, verbose):
+    def request(self, host, handler, request_body, verbose=False):
         """
         Send the XML-RPC request, return the response.
         This method is a coroutine.
         """
-        headers = {'User-Agent': self.user_agent,
-                   #Proxy-Connection': 'Keep-Alive',
-                   #'Content-Range': 'bytes oxy1.0/-1',
-                   'Accept': 'text/xml',
-                   'Content-Type': 'text/xml' }
         url = self._build_url(host, handler)
         response = None
         try:
-            response = yield from aiohttp.request(
-                'POST', url, headers=headers, data=request_body,
-                connector=self._connector, loop=self._loop)
+            response = yield from self._session.request(
+                'POST', url, headers=self.headers, data=request_body, auth=self.auth)
             body = yield from response.text()
             if response.status != 200:
                 raise ProtocolError(url, response.status,
@@ -106,22 +109,30 @@ class AioTransport(xmlrpc.Transport):
         scheme = 'https' if self.use_https else 'http'
         return '%s://%s%s' % (scheme, host, handler)
 
-    def close(self):
-    	self._connector.close()
-
 
 class ServerProxy(xmlrpc.ServerProxy):
     """
     ``xmlrpc.ServerProxy`` subclass for asyncio support
     """
 
-    def __init__(self, uri, transport=None, encoding=None, verbose=False,
-                 allow_none=False, use_datetime=False,use_builtin_types=False,
-                 loop=None):
+    def __init__(self, uri, session=None, encoding=None, verbose=False,
+                 allow_none=False, use_datetime=False, use_builtin_types=False,
+                 loop=None, auth=None, headers=None):
         self._loop = loop or asyncio.get_event_loop()
-        if not transport:
-            transport = AioTransport(uri.startswith('https://'),
-                                     loop=self._loop)
+
+        if session:
+            self._session = session
+            self._close_session = False
+        else:
+            self._close_session = True
+            self._session = aiohttp.ClientSession(loop=self._loop)
+
+        transport = AioTransport(use_https=uri.startswith('https://'),
+                                 loop=self._loop,
+                                 session=self._session,
+                                 auth=auth,
+                                 headers=headers)
+
         super().__init__(uri, transport, encoding, verbose, allow_none,
                          use_datetime, use_builtin_types)
 
@@ -143,8 +154,21 @@ class ServerProxy(xmlrpc.ServerProxy):
 
         return response
 
+    @asyncio.coroutine
     def close(self):
-    	self.__transport.close()
+        if self._close_session:
+            yield from self._session.close()
 
     def __getattr__(self, name):
         return _Method(self.__request, name)
+
+    if PY35:
+
+        @asyncio.coroutine
+        def __aenter__(self):
+            return self
+
+        @asyncio.coroutine
+        def __aexit__(self, exc_type, exc_val, exc_tb):
+            if self._close_session:
+                yield from self._session.close()
