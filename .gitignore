@@ -48,3 +48,6 @@ venv*
 
 # Sphinx documentation
 docs/_build/
+
+# pycharm
+.idea/
