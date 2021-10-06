@@ -159,16 +159,14 @@ class ServerProxy(xmlrpc.ServerProxy):
             params, methodname, encoding=self.__encoding, allow_none=self.__allow_none
         ).encode(self.__encoding)
 
-        # async with self._session:
-        if True:
-            response = await self.__transport.request(
-                self.__host, self.__handler, request, verbose=self.__verbose
-            )
+        response = await self.__transport.request(
+            self.__host, self.__handler, request, verbose=self.__verbose
+        )
 
-            if len(response) == 1:
-                response = response[0]
+        if len(response) == 1:
+            response = response[0]
 
-            return response
+        return response
 
     def __getattr__(self, name):
         return _Method(self.__request, name)
