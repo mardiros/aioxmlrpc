@@ -34,9 +34,8 @@ class _Method:
     def __getattr__(self, name):
         return _Method(self.__send, "%s.%s" % (self.__name, name))
 
-    @asyncio.coroutine
-    def __call__(self, *args):
-        ret = yield from self.__send(self.__name, args)
+    async def __call__(self, *args):
+        ret = await self.__send(self.__name, args)
         return ret
 
 
@@ -61,8 +60,7 @@ class AioTransport(xmlrpc.Transport):
 
         self.headers = headers
 
-    @asyncio.coroutine
-    def request(self, host, handler, request_body, verbose=False):
+    async def request(self, host, handler, request_body, verbose=False):
         """
         Send the XML-RPC request, return the response.
         This method is a coroutine.
@@ -70,9 +68,9 @@ class AioTransport(xmlrpc.Transport):
         url = self._build_url(host, handler)
         response = None
         try:
-            response = yield from self._session.request(
+            response = await self._session.request(
                 'POST', url, headers=self.headers, data=request_body, auth=self.auth)
-            body = yield from response.text()
+            body = await response.text()
             if response.status != 200:
                 raise ProtocolError(url, response.status,
                                     body, response.headers)
@@ -136,13 +134,12 @@ class ServerProxy(xmlrpc.ServerProxy):
         super().__init__(uri, transport, encoding, verbose, allow_none,
                          use_datetime, use_builtin_types)
 
-    @asyncio.coroutine
-    def __request(self, methodname, params):
+    async def __request(self, methodname, params):
         # call a method on the remote server
         request = xmlrpc.dumps(params, methodname, encoding=self.__encoding,
                                allow_none=self.__allow_none).encode(self.__encoding)
 
-        response = yield from self.__transport.request(
+        response = await self.__transport.request(
             self.__host,
             self.__handler,
             request,
@@ -154,21 +151,16 @@ class ServerProxy(xmlrpc.ServerProxy):
 
         return response
 
-    @asyncio.coroutine
-    def close(self):
+    async def close(self):
         if self._close_session:
-            yield from self._session.close()
+            await self._session.close()
 
     def __getattr__(self, name):
         return _Method(self.__request, name)
 
-    if PY35:
+    async def __aenter__(self):
+        return self
 
-        @asyncio.coroutine
-        def __aenter__(self):
-            return self
-
-        @asyncio.coroutine
-        def __aexit__(self, exc_type, exc_val, exc_tb):
-            if self._close_session:
-                yield from self._session.close()
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if self._close_session:
+            await self._session.close()
