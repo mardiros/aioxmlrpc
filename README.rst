@@ -3,8 +3,8 @@ aioxmlrpc
 =========
 
 
-.. image:: https://travis-ci.org/mardiros/aioxmlrpc.png?branch=master
-   :target: https://travis-ci.org/mardiros/aioxmlrpc
+.. image:: https://travis-ci.com/mardiros/aioxmlrpc.png?branch=master
+   :target: https://travis-ci.com/mardiros/aioxmlrpc
 
 
 Getting Started
@@ -52,3 +52,10 @@ This example show how to print the current version of the Gandi XML-RPC api.
         loop = asyncio.get_event_loop()
         loop.run_until_complete(print_gandi_api_version())
         loop.stop()
+
+
+Run the example
+
+::
+
+    poetry run examples/gandi_api_version.py
