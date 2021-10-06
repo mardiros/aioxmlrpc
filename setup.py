@@ -17,7 +17,7 @@ with open(os.path.join(here, NAME, '__init__.py')) as version:
                          re.S).match(version.read()).group(1)
 
 
-requires = ['aiohttp']
+requires = ['httpx']
 
 setup(name=NAME,
       version=VERSION,
