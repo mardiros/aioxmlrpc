@@ -57,11 +57,6 @@ class DummyAsyncClient:
     async def post(self, url, *args, **kwargs):
         return Response(url)
 
-    async def __aenter__(self):
-        return self
-
-    async def __aexit__(self, *args):
-        pass
 
 @pytest.mark.asyncio
 async def test_xmlrpc_ok():

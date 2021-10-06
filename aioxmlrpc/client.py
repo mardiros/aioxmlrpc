@@ -50,7 +50,6 @@ class AioTransport(xmlrpc.Transport):
         *,
         use_datetime=False,
         use_builtin_types=False,
-        headers=None,
         auth=None,
     ):
         super().__init__(use_datetime, use_builtin_types)
@@ -58,12 +57,7 @@ class AioTransport(xmlrpc.Transport):
         self._session = session
 
         self.auth = auth
-        if not headers:
-            headers = {'User-Agent': 'python/aioxmlrpc',
-                       'Accept': 'text/xml',
-                       'Content-Type': 'text/xml'}
-        self.headers = headers
-
+ 
     async def request(self, host, handler, request_body, verbose=False):
         """
         Send the XML-RPC request, return the response.
@@ -75,7 +69,6 @@ class AioTransport(xmlrpc.Transport):
             response = await self._session.post(
                 url,
                 data=request_body,
-                headers=self.headers,
                 auth=self.auth,
             )
             body = response.text
@@ -133,11 +126,15 @@ class ServerProxy(xmlrpc.ServerProxy):
         session=None,
     ):
 
-        self._session = session or httpx.AsyncClient()
+        if not headers:
+            headers = {'User-Agent': 'python/aioxmlrpc',
+                       'Accept': 'text/xml',
+                       'Content-Type': 'text/xml'}
+
+        self._session = session or httpx.AsyncClient(headers=headers)
         transport = AioTransport(
             use_https=uri.startswith("https://"),
             session=self._session,
-            headers=headers,
             auth=auth,
         )
 
@@ -157,7 +154,8 @@ class ServerProxy(xmlrpc.ServerProxy):
             params, methodname, encoding=self.__encoding, allow_none=self.__allow_none
         ).encode(self.__encoding)
 
-        async with self._session:
+        # async with self._session:
+        if True:
             response = await self.__transport.request(
                 self.__host, self.__handler, request, verbose=self.__verbose
             )
