@@ -51,12 +51,14 @@ class AioTransport(xmlrpc.Transport):
         use_datetime=False,
         use_builtin_types=False,
         auth=None,
+        timeout=None,
     ):
         super().__init__(use_datetime, use_builtin_types)
         self.use_https = use_https
         self._session = session
 
         self.auth = auth
+        self.timeout = timeout
  
     async def request(self, host, handler, request_body, verbose=False):
         """
@@ -70,6 +72,7 @@ class AioTransport(xmlrpc.Transport):
                 url,
                 data=request_body,
                 auth=self.auth,
+                timeout=self.timeout,
             )
             body = response.text
             if response.status_code != 200:
@@ -123,6 +126,7 @@ class ServerProxy(xmlrpc.ServerProxy):
         use_builtin_types=False,
         auth=None,
         headers=None,
+        timeout=5.0,
         session=None,
     ):
 
@@ -136,6 +140,7 @@ class ServerProxy(xmlrpc.ServerProxy):
             use_https=uri.startswith("https://"),
             session=self._session,
             auth=auth,
+            timeout=timeout,
         )
 
         super().__init__(
