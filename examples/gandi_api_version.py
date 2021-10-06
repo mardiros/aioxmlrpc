@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import asyncio
 
 from aioxmlrpc.client import ServerProxy
