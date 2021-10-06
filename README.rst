@@ -3,8 +3,8 @@ aioxmlrpc
 =========
 
 
-.. image:: https://travis-ci.org/mardiros/aioxmlrpc.png?branch=master
-   :target: https://travis-ci.org/mardiros/aioxmlrpc
+.. image:: https://travis-ci.com/mardiros/aioxmlrpc.png?branch=master
+   :target: https://travis-ci.com/mardiros/aioxmlrpc
 
 
 Getting Started
