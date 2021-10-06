@@ -141,6 +141,8 @@ class ServerProxy(xmlrpc.ServerProxy):
             session=self._session,
             auth=auth,
             timeout=timeout,
+            use_datetime=use_datetime,
+            use_builtin_types=use_builtin_types,
         )
 
         super().__init__(
