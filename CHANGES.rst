@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.6.1 released on 2021-12-13
+0.6.2 released on 2021-12-13
 ----------------------------
 
  * Update httpx to ^0.21.1
