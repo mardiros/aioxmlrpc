@@ -21,7 +21,7 @@ with coroutine is implemented.
 Fill free to fork me if you want to implement the server part.
 
 
-``aioxmlrpc`` is based on ``aiohttp`` for the transport, and just patch
+``aioxmlrpc`` is based on ``httpx`` for the transport, and just patch
 the necessary from the python standard library to get it working.
 
 
