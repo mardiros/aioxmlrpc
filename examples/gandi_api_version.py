@@ -3,7 +3,7 @@ import asyncio
 
 from aioxmlrpc.client import ServerProxy
 
-ENDPOINT = 'https://rpc.gandi.net/xmlrpc/'
+ENDPOINT = "https://rpc.gandi.net/xmlrpc/"
 
 
 async def main():
@@ -13,5 +13,5 @@ async def main():
         print(data)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())

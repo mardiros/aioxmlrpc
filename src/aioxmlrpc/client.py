@@ -59,7 +59,7 @@ class AioTransport(xmlrpc.Transport):
 
         self.auth = auth
         self.timeout = timeout
- 
+
     async def request(self, host, handler, request_body, verbose=False):
         """
         Send the XML-RPC request, return the response.
@@ -131,9 +131,11 @@ class ServerProxy(xmlrpc.ServerProxy):
     ):
 
         if not headers:
-            headers = {'User-Agent': 'python/aioxmlrpc',
-                       'Accept': 'text/xml',
-                       'Content-Type': 'text/xml'}
+            headers = {
+                "User-Agent": "python/aioxmlrpc",
+                "Accept": "text/xml",
+                "Content-Type": "text/xml",
+            }
 
         self._session = session or httpx.AsyncClient(headers=headers)
         transport = AioTransport(

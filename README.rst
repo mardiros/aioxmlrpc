@@ -8,7 +8,7 @@ aioxmlrpc
 
 .. image:: https://codecov.io/gh/mardiros/aioxmlrpc/branch/master/graph/badge.svg?token=BR3KttC9uJ
    :target: https://codecov.io/gh/mardiros/aioxmlrpc
-    
+
 
 Getting Started
 ===============

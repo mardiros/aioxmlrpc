@@ -1,5 +1,6 @@
 import httpx
 import pytest
+
 from aioxmlrpc.client import Fault, ProtocolError, ServerProxy
 
 RESPONSES = {
@@ -53,7 +54,6 @@ class Response:
 
 
 class DummyAsyncClient:
-
     async def post(self, url, *args, **kwargs):
         return Response(url)
 
@@ -67,7 +67,9 @@ async def test_xmlrpc_ok():
 
 @pytest.mark.asyncio
 async def test_xmlrpc_fault():
-    client = ServerProxy("http://localhost/test_xmlrpc_fault", session=DummyAsyncClient())
+    client = ServerProxy(
+        "http://localhost/test_xmlrpc_fault", session=DummyAsyncClient()
+    )
 
     with pytest.raises(Fault):
         await client.name.space.proxfyiedcall()
