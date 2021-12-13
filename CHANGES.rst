@@ -1,6 +1,17 @@
 Changelog
 =========
 
+0.6.1 released on 2021-12-13
+----------------------------
+
+ * Update httpx to ^0.21.1
+ * Switch CI to github action
+
+0.6.1 released on 2021-10-06
+----------------------------
+
+ * Switch to httpx
+
 0.5 released on 2017-09-10
 --------------------------
 

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aioxmlrpc"
-version = "0.6.1"
+version = "0.6.2"
 description = "Source code of Sequoia API TLDPublic"
 readme = "README.rst"
 homepage = "https://github.com/mardiros/aioxmlrpc"
