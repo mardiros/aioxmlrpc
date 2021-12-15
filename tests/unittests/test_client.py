@@ -44,14 +44,6 @@ I am really broken
 }
 
 
-# class Response:
-#     def __init__(self, url):
-#         response = RESPONSES[url]
-#         self.status_code = response["status"]
-#         self.text = response["body"]
-#         self.headers = {}
-
-
 class DummyAsyncClient:
     async def post(self, url, *args, **kwargs):
         response = RESPONSES[url]
