@@ -76,7 +76,12 @@ class AioTransport(xmlrpc.Transport):
             )
             body = response.text
             if response.status_code != 200:
-                raise ProtocolError(url, response.status, body, response.headers)
+                raise ProtocolError(
+                    url,
+                    response.status_code,
+                    body,
+                    response.headers,
+                )
         except asyncio.CancelledError:
             raise
         except ProtocolError:
