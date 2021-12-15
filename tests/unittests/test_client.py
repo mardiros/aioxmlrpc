@@ -1,6 +1,5 @@
-import httpx
 import pytest
-
+from httpx import Request, Response
 from aioxmlrpc.client import Fault, ProtocolError, ServerProxy
 
 RESPONSES = {
@@ -45,17 +44,13 @@ I am really broken
 }
 
 
-class Response:
-    def __init__(self, url):
-        response = RESPONSES[url]
-        self.status_code = response["status"]
-        self.text = response["body"]
-        self.headers = {}
-
-
 class DummyAsyncClient:
     async def post(self, url, *args, **kwargs):
-        return Response(url)
+        response = RESPONSES[url]
+        return Response(
+            status_code=response["status"], headers={}, text=response["body"],
+            request=Request("POST", url)
+        )
 
 
 @pytest.mark.asyncio
