@@ -53,14 +53,12 @@ class DummyAsyncClient:
         )
 
 
-@pytest.mark.asyncio
 async def test_xmlrpc_ok():
     client = ServerProxy("http://localhost/test_xmlrpc_ok", session=DummyAsyncClient())
     response = await client.name.space.proxfyiedcall()
     assert response == 1
 
 
-@pytest.mark.asyncio
 async def test_xmlrpc_fault():
     client = ServerProxy(
         "http://localhost/test_xmlrpc_fault", session=DummyAsyncClient()
@@ -70,7 +68,6 @@ async def test_xmlrpc_fault():
         await client.name.space.proxfyiedcall()
 
 
-@pytest.mark.asyncio
 async def test_http_500():
     client = ServerProxy("http://localhost/test_http_500", session=DummyAsyncClient())
 
@@ -78,7 +75,6 @@ async def test_http_500():
         await client.name.space.proxfyiedcall()
 
 
-@pytest.mark.asyncio
 async def test_network_error():
     client = ServerProxy("http://nonexistent/nonexistent")
 
