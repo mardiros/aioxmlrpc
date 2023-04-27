@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "aioxmlrpc"
 version = "0.6.4"
-description = "Source code of Sequoia API TLDPublic"
+description = "XML-RPC client for asyncio"
 readme = "README.rst"
 homepage = "https://github.com/mardiros/aioxmlrpc"
 license = "BSD-3-Clause License"
