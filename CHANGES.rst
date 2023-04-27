@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.6.5 - Released on 2023-04-27
+------------------------------
+* Update dependencies
+
 0.6.4 - Released on 2022-06-02
 ------------------------------
 * Update dependencies
