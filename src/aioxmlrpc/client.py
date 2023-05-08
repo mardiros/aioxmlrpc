@@ -130,9 +130,10 @@ class ServerProxy(xmlrpc.ServerProxy):
         use_datetime=False,
         use_builtin_types=False,
         auth=None,
+        *,
         headers=None,
-        timeout=5.0,
         context=None,
+        timeout=5.0,
         session=None,
     ):
 
