@@ -132,6 +132,7 @@ class ServerProxy(xmlrpc.ServerProxy):
         auth=None,
         headers=None,
         timeout=5.0,
+        context=None,
         session=None,
     ):
 
@@ -141,8 +142,9 @@ class ServerProxy(xmlrpc.ServerProxy):
                 "Accept": "text/xml",
                 "Content-Type": "text/xml",
             }
-
-        self._session = session or httpx.AsyncClient(headers=headers)
+        if context is None:
+            context = True
+        self._session = session or httpx.AsyncClient(headers=headers, verify=context)
         transport = AioTransport(
             use_https=uri.startswith("https://"),
             session=self._session,
