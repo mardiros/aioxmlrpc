@@ -10,9 +10,6 @@ aioxmlrpc
    :target: https://codecov.io/gh/mardiros/aioxmlrpc
 
 
-Getting Started
-===============
-
 Asyncio version of the standard lib ``xmlrpc``
 
 Currently only ``aioxmlrpc.client``, which works like ``xmlrpc.client`` but
@@ -28,13 +25,16 @@ the necessary from the python standard library to get it working.
 Installation
 ------------
 
+aioxmlrpc is available on PyPI, it can simply be installed with your favorite
+tool, example with pip here.
+
 ::
 
     pip install aioxmlrpc
 
 
-Example of usage
-----------------
+Getting Started
+---------------
 
 This example show how to print the current version of the Gandi XML-RPC api.
 
@@ -62,3 +62,4 @@ Run the example
 ::
 
     poetry run examples/gandi_api_version.py
+
