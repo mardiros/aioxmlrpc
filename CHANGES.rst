@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.7.0 - Released on 2023-05-08
+------------------------------
+* New feature: Add missing context kwargs argument for ServerProxy compatibility.
+* Breaking change: Argument headers must be a kwargs like in the standard library.
+* Breaking change: Non standard arguments timeout and session must be kwargs too.
+* Update dependencies
+
 0.6.5 - Released on 2023-04-27
 ------------------------------
 * Update dependencies
