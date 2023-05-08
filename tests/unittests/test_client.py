@@ -1,3 +1,4 @@
+import ssl
 import pytest
 from httpx import Request, Response
 from aioxmlrpc.client import Fault, ProtocolError, ServerProxy
@@ -48,8 +49,10 @@ class DummyAsyncClient:
     async def post(self, url, *args, **kwargs):
         response = RESPONSES[url]
         return Response(
-            status_code=response["status"], headers={}, text=response["body"],
-            request=Request("POST", url)
+            status_code=response["status"],
+            headers={},
+            text=response["body"],
+            request=Request("POST", url),
         )
 
 
@@ -80,3 +83,21 @@ async def test_network_error():
 
     with pytest.raises(ProtocolError):
         await client.name.space.proxfyiedcall()
+
+
+def test_context_default():
+    client = ServerProxy("http://nonexistent/nonexistent")
+    ctx = client._session._transport._pool._ssl_context  # type: ignore
+    assert ctx.verify_mode is ssl.VerifyMode.CERT_REQUIRED
+
+
+def test_context_disable():
+    client = ServerProxy("http://nonexistent/nonexistent", context=False)
+    ctx = client._session._transport._pool._ssl_context  # type: ignore
+    assert ctx.verify_mode is ssl.VerifyMode.CERT_NONE
+
+
+def test_context_custom():
+    ctx = ssl.create_default_context()
+    client = ServerProxy("http://nonexistent/nonexistent", context=ctx)
+    assert client._session._transport._pool._ssl_context is ctx  # type: ignore
