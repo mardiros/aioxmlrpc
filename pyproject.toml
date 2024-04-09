@@ -9,7 +9,10 @@ authors = ["Guillaume Gauvrit <guillaume@gauvr.it>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-httpx = "^0.24.0"
+httpx = [
+  {python = "3.7", version = "^0.24.1"},
+  {python = ">=3.8", version = ">=0.24, <1"},
+]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
