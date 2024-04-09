@@ -1,3 +1,7 @@
+0.8.0  - Released on 2024-04-09
+-------------------------------
+* Update dependencies 
+
 Changelog
 =========
 
