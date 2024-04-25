@@ -1,9 +1,10 @@
+0.8.1  - Released on 2024-04-25
+-------------------------------
+* Add PEP-517 metadata in python package 
+
 0.8.0  - Released on 2024-04-09
 -------------------------------
 * Update dependencies 
-
-Changelog
-=========
 
 0.7.0 - Released on 2023-05-08
 ------------------------------

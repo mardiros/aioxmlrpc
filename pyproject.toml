@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "aioxmlrpc"
-version = "0.8.0"
+version = "0.8.1"
 description = "XML-RPC client for asyncio"
 readme = "README.rst"
 homepage = "https://github.com/mardiros/aioxmlrpc"
