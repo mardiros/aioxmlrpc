@@ -3,7 +3,7 @@ default_unittest_suite := 'tests/unittests'
 default_functest_suite := 'tests/functionals'
 
 install:
-    poetry install
+    poetry install --with dev
 
 test test_suite=default_unittest_suite:
     poetry run pytest -sxv {{test_suite}}
