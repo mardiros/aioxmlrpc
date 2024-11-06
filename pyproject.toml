@@ -1,6 +1,16 @@
 [project]
 name = "aioxmlrpc"
 description = "XML-RPC client for asyncio"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: System :: Networking"
+]
 version = "0.8.1"
 readme = "README.rst"
 license = { text = "MIT License" }
