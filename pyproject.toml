@@ -9,7 +9,8 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Topic :: Internet :: WWW/HTTP",
     "Topic :: Software Development :: Libraries",
-    "Topic :: System :: Networking"
+    "Topic :: System :: Networking",
+    "Typing :: Typed",
 ]
 version = "0.8.1"
 readme = "README.rst"
@@ -32,12 +33,22 @@ Changelog = "https://mardiros.github.io/aioxmlrpc/user/changelog.html"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-asyncio_default_fixture_loop_scope="function"
+asyncio_default_fixture_loop_scope = "function"
+
+[[tool.mypy.overrides]]
+disallow_any_generics = true
+disallow_untyped_defs = true
+module = "aioxmlrpc.*"
 
 [tool.pyright]
 ignore = ["examples"]
 include = ["src", "tests"]
-typeCheckingMode = "basic"
+reportPrivateUsage = false
+reportUnknownMemberType = false
+reportUnknownParameterType = false
+reportUnknownVariableType = false
+reportShadowedImports = false
+typeCheckingMode = "strict"
 venvPath = ".venv"
 
 [dependency-groups]

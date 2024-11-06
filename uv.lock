@@ -22,7 +22,7 @@ requires-dist = [{ name = "httpx", specifier = ">=0.24,<1" }]
 
 [package.metadata.dependency-groups]
 dev = [
-    { name = "mypy", specifier = ">=1.13.0" },
+    { name = "mypy", specifier = ">=1.13.0,<2" },
     { name = "pytest", specifier = ">=8.3.3,<9" },
     { name = "pytest-asyncio", specifier = ">=0.24.0" },
     { name = "pytest-cov", specifier = ">=6.0.0,<7" },
