@@ -1,32 +1,37 @@
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry]
+[project]
 name = "aioxmlrpc"
-version = "0.8.1"
 description = "XML-RPC client for asyncio"
+version = "0.8.1"
 readme = "README.rst"
-homepage = "https://github.com/mardiros/aioxmlrpc"
-license = "BSD-3-Clause License"
-authors = ["Guillaume Gauvrit <guillaume@gauvr.it>"]
+license = { text = "MIT License" }
+authors = [{ name = "Guillaume Gauvrit", email = "guillaume@gauvr.it" }]
+requires-python = ">=3.9"
 
-[tool.poetry.dependencies]
-python = "^3.7"
-httpx = [
-  {python = "3.7", version = "^0.24.1"},
-  {python = ">=3.8", version = ">=0.24, <1"},
-]
+dependencies = ["httpx >=0.24, <1"]
+
+[tool.pdm.build]
+includes = ["src", "CHANGELOG.rst"]
+excludes = ["tests"]
+
+[project.urls]
+Homepage = "https://mardiros.github.io/aioxmlrpc"
+Documentation = "https://mardiros.github.io/aioxmlrpc"
+Repository = "https://github.com/mardiros/aioxmlrpc.git"
+Issues = "https://github.com/mardiros/aioxmlrpc/issues"
+Changelog = "https://mardiros.github.io/aioxmlrpc/user/changelog.html"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 
-[tool.poetry.group.dev]
-optional = true
+[tool.pyright]
+ignore = ["examples"]
+include = ["src", "tests"]
+typeCheckingMode = "basic"
+venvPath = ".venv"
 
-[tool.poetry.group.dev.dependencies]
-black = "^22.3.0"
-isort = "^5.9.3"
-pytest = "^7.3.1"
-pytest-asyncio = "^0.21.0"
-pytest-cov = "^4.0.0"
+[dependency-groups]
+dev = ["pytest >=8.3.3,<9", "pytest-asyncio >=0.24.0", "pytest-cov >=6.0.0,<7"]
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"

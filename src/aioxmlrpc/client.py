@@ -20,7 +20,6 @@ Fault = xmlrpc.Fault
 ProtocolError = xmlrpc.ProtocolError
 
 log = logging.getLogger(__name__)
-PY35 = sys.version_info >= (3, 5)
 
 
 class _Method:

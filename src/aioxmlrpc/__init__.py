@@ -1,6 +1,6 @@
 """
 XML-RPC Protocol for ``asyncio``
 """
-import pkg_resources
+from importlib import metadata
 
-__version__ = pkg_resources.get_distribution("aioxmlrpc").version
+__version__ = metadata.version("aioxmlrpc")
