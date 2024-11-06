@@ -1,0 +1,37 @@
+# Publish a release to PyPI.
+#
+name: "Publish to PyPI"
+
+on:
+  workflow_call:
+    inputs:
+      release-version:
+        required: true
+        type: string
+      dry-run:
+        required: true
+        type: boolean
+
+jobs:
+  pypi-publish:
+    name: Upload to PyPI ${{ inputs.release-version }} ${{ inputs.dry-run && '(dry-run)' || '' }}
+    runs-on: ubuntu-latest
+    if: ${{ !inputs.dry-run }}
+    permissions:
+      # This permission is needed for private repositories.
+      contents: read
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: pypi_files
+          path: dist
+          merge-multiple: true
+
+      - uses: pdm-project/setup-pdm@v4
+        with:
+          python-version: 3.12
+
+      - name: Publish package distributions to PyPI
+        run: pdm publish --no-build

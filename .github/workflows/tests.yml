@@ -1,0 +1,70 @@
+# This is a basic workflow to help you get started with Actions
+
+name: tests
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run the tests suite manually from the Actions tab
+  workflow_dispatch:
+
+  # Allows you to run the tests suite before building release artifacts
+  workflow_call:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  CI:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+      - uses: chartboost/ruff-action@v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install the project
+        run: uv sync --group dev
+
+      # - name: Check types
+      #   run: |
+      #     uv run mypy src/aioxmlrpc/
+
+      - name: Run tests
+        run: |
+          uv run pytest tests  --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=aioxmlrpc --cov-report=xml --cov-report=html
+
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results-${{ matrix.python-version }}
+          path: junit/test-results-${{ matrix.python-version }}.xml
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }} && matrix.python-version == '3.12' && github.event_name != 'workflow_dispatch'
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Codecov
+        if: matrix.python-version == '3.12' && github.event_name != 'workflow_dispatch'
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          # Comma-separated list of files to upload
+          files: coverage.xml

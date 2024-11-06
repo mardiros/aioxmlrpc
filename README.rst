@@ -2,8 +2,8 @@
 aioxmlrpc
 =========
 
-.. image:: https://github.com/mardiros/aioxmlrpc/actions/workflows/main.yml/badge.svg
-   :target: https://github.com/mardiros/aioxmlrpc/actions/workflows/main.yml
+.. image:: https://github.com/mardiros/aioxmlrpc/actions/workflows/tests.yml/badge.svg
+   :target: https://github.com/mardiros/aioxmlrpc/actions/workflows/tests.yml
 
 
 .. image:: https://codecov.io/gh/mardiros/aioxmlrpc/branch/master/graph/badge.svg?token=BR3KttC9uJ
@@ -62,4 +62,3 @@ Run the example
 ::
 
     poetry run examples/gandi_api_version.py
-
