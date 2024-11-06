@@ -4,14 +4,15 @@
 * Breaking change: drop support of python 3.7 and python 3.8.
 * Switch packaging to uv / pdm.
 * CI update
+* Update LICENSE to MIT
 
 0.8.1  - Released on 2024-04-25
 -------------------------------
-* Add PEP-517 metadata in python package 
+* Add PEP-517 metadata in python package
 
 0.8.0  - Released on 2024-04-09
 -------------------------------
-* Update dependencies 
+* Update dependencies
 
 0.7.0 - Released on 2023-05-08
 ------------------------------
