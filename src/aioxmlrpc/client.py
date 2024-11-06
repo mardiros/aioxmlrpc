@@ -108,7 +108,7 @@ class AioTransport(xmlrpc.Transport):
             log.error("Unexpected error", exc_info=True)
             if response is not None:
                 errcode = response.status_code
-                headers = cast(dict[str, str], response.headers)
+                headers = cast(dict[str, str], response.headers)  # coverage: ignore
             else:
                 errcode = 0
                 headers = {}
