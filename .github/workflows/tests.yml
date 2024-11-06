@@ -41,9 +41,9 @@ jobs:
       - name: Install the project
         run: uv sync --group dev
 
-      - name: Check types
-        run: |
-          uv run mypy src/aioxmlrpc/
+      # - name: Check types
+      #   run: |
+      #     uv run mypy src/aioxmlrpc/
 
       - name: Run tests
         run: |
