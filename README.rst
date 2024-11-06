@@ -61,4 +61,4 @@ Run the example
 
 ::
 
-    poetry run examples/gandi_api_version.py
+    uv run examples/gandi_api_version.py
