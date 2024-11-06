@@ -55,7 +55,14 @@ jobs:
           name: pytest-results-${{ matrix.python-version }}
           path: junit/test-results-${{ matrix.python-version }}.xml
 
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }} && matrix.python-version == '3.12' && github.event_name != 'workflow_dispatch'
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
       - name: Codecov
+        if: matrix.python-version == '3.12' && github.event_name != 'workflow_dispatch'
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
