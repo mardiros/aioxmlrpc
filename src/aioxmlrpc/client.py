@@ -8,7 +8,6 @@ work with asyncio.
 
 import asyncio
 import logging
-import sys
 from xmlrpc import client as xmlrpc
 
 import httpx
@@ -135,7 +134,6 @@ class ServerProxy(xmlrpc.ServerProxy):
         timeout=5.0,
         session=None,
     ):
-
         if not headers:
             headers = {
                 "User-Agent": "python/aioxmlrpc",
