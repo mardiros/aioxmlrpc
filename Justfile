@@ -5,10 +5,13 @@ default_functest_suite := 'tests/functionals'
 install:
     uv sync --group dev
 
-test: lint unittest
+test: lint typecheck unittest
 
 lint:
     uv run ruff check .
+
+typecheck:
+    uv run mypy src/ tests/
 
 unittest test_suite=default_unittest_suite:
     uv run pytest -sxv {{test_suite}}
