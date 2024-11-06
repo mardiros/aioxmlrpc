@@ -1,3 +1,10 @@
+0.9.0  - Released on 2024-11-06
+-------------------------------
+* Add typing.
+* Breaking change: drop support of python 3.7 and python 3.8.
+* Switch packaging to uv / pdm.
+* CI update
+
 0.8.1  - Released on 2024-04-25
 -------------------------------
 * Add PEP-517 metadata in python package 
