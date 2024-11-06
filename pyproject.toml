@@ -21,7 +21,7 @@ requires-python = ">=3.9"
 dependencies = ["httpx >=0.24, <1"]
 
 [tool.pdm.build]
-includes = ["src", "CHANGELOG.rst"]
+includes = ["src", "CHANGELOG.rst", "CONTRIBUTORS.rst"]
 excludes = ["tests"]
 
 [project.urls]
