@@ -18,7 +18,14 @@ jobs:
   test-sdist:
     name: test tarball archive of ${{ inputs.release-version }} ${{ inputs.dry-run && '(dry-run)' || '' }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
       - uses: actions/download-artifact@v4
         with:
           pattern: pypi_files
