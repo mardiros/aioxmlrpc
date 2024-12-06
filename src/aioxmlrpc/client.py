@@ -8,11 +8,13 @@ work with asyncio.
 
 import asyncio
 import logging
+import ssl
 from typing import (
     Any,
     Awaitable,
     Callable,
     Optional,
+    Union,
     cast,
 )
 from xmlrpc import client as xmlrpc
@@ -153,7 +155,7 @@ class ServerProxy(xmlrpc.ServerProxy):
         auth: Optional[httpx._types.AuthTypes] = None,
         *,
         headers: Optional[dict[str, Any]] = None,
-        context: Optional[httpx._types.VerifyTypes] = None,
+        context: Optional[Union[bool, ssl.SSLContext]] = None,
         timeout: httpx._types.TimeoutTypes = 5.0,
         session: Optional[httpx.AsyncClient] = None,
     ) -> None:
