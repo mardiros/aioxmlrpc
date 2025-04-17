@@ -2,36 +2,42 @@
 aioxmlrpc
 =========
 
+.. image:: https://github.com/mardiros/aioxmlrpc/actions/workflows/tests.yml/badge.svg
+   :target: https://github.com/mardiros/aioxmlrpc/actions/workflows/tests.yml
 
-.. image:: https://travis-ci.org/mardiros/aioxmlrpc.png?branch=master
-   :target: https://travis-ci.org/mardiros/aioxmlrpc
 
+.. image:: https://codecov.io/gh/mardiros/aioxmlrpc/branch/master/graph/badge.svg?token=BR3KttC9uJ
+   :target: https://codecov.io/gh/mardiros/aioxmlrpc
 
-Getting Started
-===============
 
 Asyncio version of the standard lib ``xmlrpc``
 
-``aioxmlrpc.client``, which works like ``xmlrpc.client`` but
-with coroutine is implemented.
+``aioxmlrpc.client``, which works like ``xmlrpc.client`` but uses coroutines,
+has been implemented.
 
 ``aioxmlrpc.server``, which works pretty much like ``xmlrpc.server`` but
 can be run in asyncio loop and handle normal remote procedure call (RPC) and remote coroutines call (RCC).
 
-``aioxmlrpc`` is based on ``aiohttp`` for the transport, and just patch
+``aioxmlrpc`` is based on ``httpx`` for the transport, and just patch
 the necessary from the python standard library to get it working.
 
 
 Installation
 ------------
 
+aioxmlrpc is available on PyPI, it can simply be installed with your favorite
+tool, example with pip here.
+
 ::
 
     pip install aioxmlrpc
 
 
-Example of usage
-----------------
+Getting Started
+---------------
+
+Client
+~~~~~~
 
 This example show how to print the current version of the Gandi XML-RPC api.
 
@@ -42,10 +48,9 @@ This example show how to print the current version of the Gandi XML-RPC api.
     from aioxmlrpc.client import ServerProxy
 
 
-    @asyncio.coroutine
-    def print_gandi_api_version():
+    async def print_gandi_api_version():
         api = ServerProxy('https://rpc.gandi.net/xmlrpc/')
-        result = yield from api.version.info()
+        result = await api.version.info()
         print(result)
 
     if __name__ == '__main__':
@@ -54,8 +59,15 @@ This example show how to print the current version of the Gandi XML-RPC api.
         loop.stop()
 
 
-Exemple of usage
-----------------
+Run the example
+
+::
+
+    uv run examples/gandi_api_version.py
+
+
+Server
+~~~~~~
 
 This example show an exemple of the server side.
 
@@ -81,4 +93,3 @@ This example show an exemple of the server side.
        f = loop.create_server(lambda: server.request_handler(debug=True, keep_alive=75), '0.0.0.0', '8080')
        loop.run_until_complete(f)
        loop.run_forever()
-

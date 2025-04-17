@@ -1,0 +1,58 @@
+name: tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+  workflow_call:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: chartboost/ruff-action@v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install the project
+        run: uv sync --group dev
+
+      - name: Check types
+        run: |
+          uv run mypy src/aioxmlrpc/
+
+      - name: Run tests
+        run: |
+          uv run pytest tests  --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=aioxmlrpc --cov-report=xml --cov-report=html
+
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results-${{ matrix.python-version }}
+          path: junit/test-results-${{ matrix.python-version }}.xml
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }} && matrix.python-version == '3.12' && github.event_name != 'workflow_dispatch'
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Codecov
+        if: matrix.python-version == '3.12' && github.event_name != 'workflow_dispatch'
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml

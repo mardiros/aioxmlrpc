@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'       # Automatically trigger on version tags
+      - 'dry-run'
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release Tag"
+        required: true
+        default: "dry-run"
+        type: string
+
+env:
+  PYTHON_VERSION: "3.12"
+
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      release_version: ${{ steps.release-version.outputs.release_version }}
+      dry-run: ${{ steps.release-version.outputs.dry_run }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set Release Version
+      id: release-version
+      run: |
+        if [ "${{ github.event_name }}" == "push" ]; then
+          echo "release_version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          if [ "${{ github.ref_name }}" == "dry-run" ]; then
+            echo "dry_run=true" >> $GITHUB_OUTPUT
+          else
+            echo "dry_run=false" >> $GITHUB_OUTPUT
+          fi
+        else
+          version="${{ github.event.inputs.tag || 'dry-run' }}"
+          if [ "${version}" == "dry-run" ]; then
+            echo "release_version=latest" >> $GITHUB_OUTPUT
+            echo "dry_run=true" >> $GITHUB_OUTPUT
+          else
+            echo "release_version=${version}" >> $GITHUB_OUTPUT
+            echo "dry_run=false" >> $GITHUB_OUTPUT
+          fi
+        fi
+    - name: Display Release Version
+      run: echo "The release version is ${{ steps.release-version.outputs.release_version }}"
+
+  unit-tests:
+    uses: ./.github/workflows/tests.yml
+
+  build-artifacts:
+    needs:
+      - plan
+      - unit-tests
+    uses: ./.github/workflows/build-artifacts.yml
+    with:
+      release-version: ${{ needs.plan.outputs.release_version }}
+      dry-run: ${{ needs.plan.outputs.dry-run == 'true' }}
+      python-version: '3.12'
+
+  tests-artifacts:
+    needs:
+      - plan
+      - build-artifacts
+    uses: ./.github/workflows/tests-artifacts.yml
+    with:
+      release-version: ${{ needs.plan.outputs.release_version }}
+      dry-run: ${{ needs.plan.outputs.dry-run == 'true' }}
+
+  publish-pypi:
+    needs:
+      - plan
+      - tests-artifacts
+    uses: ./.github/workflows/publish-pypi.yml
+    with:
+      release-version: ${{ needs.plan.outputs.release_version }}
+      dry-run: ${{ needs.plan.outputs.dry-run == 'true' }}
