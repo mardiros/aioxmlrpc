@@ -7,4 +7,5 @@ Vladimir Rutsky
 nibrag
 sayoun
 Ondra Geršl
-romuald
+Romuald Brunet
+Sylvain Peyrefitte
