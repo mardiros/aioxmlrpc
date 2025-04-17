@@ -25,8 +25,8 @@ includes = ["src", "CHANGELOG.rst", "CONTRIBUTORS.rst"]
 excludes = ["tests"]
 
 [project.urls]
-Homepage = "https://mardiros.github.io/aioxmlrpc"
-Documentation = "https://mardiros.github.io/aioxmlrpc"
+Homepage = "https://github.com/mardiros/aioxmlrpc"
+Documentation = "https://github.com/mardiros/aioxmlrpc/blob/main/README.rst"
 Repository = "https://github.com/mardiros/aioxmlrpc.git"
 Issues = "https://github.com/mardiros/aioxmlrpc/issues"
 Changelog = "https://mardiros.github.io/aioxmlrpc/user/changelog.html"
