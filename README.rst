@@ -57,7 +57,7 @@ This example show how to print the current version of the Gandi XML-RPC api.
 Exemple of usage
 ----------------
 
-This exemple show an exemple of the server side.
+This example show an exemple of the server side.
 
 
 ::
