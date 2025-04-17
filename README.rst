@@ -12,8 +12,8 @@ aioxmlrpc
 
 Asyncio version of the standard lib ``xmlrpc``
 
-Currently only ``aioxmlrpc.client``, which works like ``xmlrpc.client`` but
-with coroutine is implemented.
+Currently, only ``aioxmlrpc.client``, which works like ``xmlrpc.client`` but uses coroutines,
+has been implemented.
 
 Fill free to fork me if you want to implement the server part.
 
@@ -45,10 +45,9 @@ This example show how to print the current version of the Gandi XML-RPC api.
     from aioxmlrpc.client import ServerProxy
 
 
-    @asyncio.coroutine
-    def print_gandi_api_version():
+    async def print_gandi_api_version():
         api = ServerProxy('https://rpc.gandi.net/xmlrpc/')
-        result = yield from api.version.info()
+        result = await api.version.info()
         print(result)
 
     if __name__ == '__main__':
