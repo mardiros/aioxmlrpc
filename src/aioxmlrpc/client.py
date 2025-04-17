@@ -76,7 +76,7 @@ class AioTransport(xmlrpc.Transport):
         self,
         host: str,
         handler: str,
-        request_body: dict[str, Any],
+        request_body: bytes,
         verbose: bool = False,
     ) -> RPCResult:
         """
@@ -88,7 +88,7 @@ class AioTransport(xmlrpc.Transport):
         try:
             response = await self._session.post(
                 url,
-                data=request_body,
+                content=request_body,
                 auth=self.auth,
                 timeout=self.timeout,
             )
