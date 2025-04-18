@@ -65,3 +65,23 @@ async def test_marshall(params: str, expected: str):
     d.register_function(lambda x, y: x / y, "division")
     resp = await d._marshaled_dispatch(params)
     assert resp.decode() == expected
+
+
+async def test_multicall():
+    d = SimpleXMLRPCDispatcher()
+    d.register_function(lambda x, y: x / y, "division")
+    resp = await d.system_multicall(
+        [
+            {"methodName": "division", "params": [8, 2]},
+            {"methodName": "division", "params": [8, 0]},
+        ],
+    )
+    assert resp == [
+        [
+            4.0,
+        ],
+        {
+            "faultCode": 1,
+            "faultString": "ZeroDivisionError:division by zero",
+        },
+    ]

@@ -98,6 +98,21 @@ class SimpleXMLRPCDispatcher(server.SimpleXMLRPCDispatcher):
         else:
             raise Exception('method "%s" is not supported' % method)
 
+    async def system_multicall(self, call_list: list[dict[str, _Marshallable]]):  # type: ignore
+        async def handle_call(call: dict[str, _Marshallable]) -> _Marshallable:
+            method_name = call["methodName"]
+            params = call["params"]
+
+            try:
+                result = await self._dispatch(method_name, params)
+                return [result]
+            except Fault as fault:
+                return {"faultCode": fault.faultCode, "faultString": fault.faultString}
+            except BaseException as exc:
+                return {"faultCode": 1, "faultString": f"{type(exc).__name__}:{exc}"}
+
+        return await asyncio.gather(*(handle_call(call) for call in call_list))
+
 
 class SimpleXMLRPCServer(SimpleXMLRPCDispatcher):
     rpc_paths = ["/", "/RPC2", "/xmlrpc"]
