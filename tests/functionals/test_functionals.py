@@ -14,6 +14,11 @@ async def test_coroutine(client: ServerProxy):
     assert await client.multiply(4, 2) == 8
 
 
+
+async def test_decorator(client: ServerProxy):
+    assert await client.substract(16, 2) == 14
+
+
 async def test_dotted(client: ServerProxy):
     assert await client.get_data() == "42"
     assert await client.dt.now() == datetime.today()

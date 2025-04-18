@@ -156,13 +156,13 @@ class SimpleXMLRPCServer(SimpleXMLRPCDispatcher):
         self.server = uvicorn.Server(config)
         return asyncio.create_task(self.server.serve())
 
-    @overload
-    def register_function(  # type: ignore
+    @overload  # type: ignore
+    def register_function(
         self, function: Callable[..., _Marshallable], name: Optional[str] = None
     ) -> Callable[..., _Marshallable]: ...
 
     @overload
-    def register_function(  # type: ignore
+    def register_function(
         self,
         function: Coroutine[Awaitable[_Marshallable], Any, Any],
         name: Optional[str] = None,

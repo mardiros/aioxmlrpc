@@ -44,6 +44,11 @@ async def server():
         server.register_function(pow)
         server.register_function(multiply)
         server.register_function(lambda x, y: x + y, "add")  # type: ignore
+
+        @server.register_function
+        async def substract(x: int, y: int) -> int:
+            return x - y
+
         server.register_instance(ExampleService(), allow_dotted_names=True)
         server.register_multicall_functions()
 
