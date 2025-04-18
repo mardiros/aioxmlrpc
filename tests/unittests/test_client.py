@@ -3,7 +3,7 @@ import ssl
 import pytest
 from httpx import Request, Response
 
-from aioxmlrpc.client import Fault, ProtocolError, ServerProxy
+from aioxmlrpc.client import Fault, MultiCall, ProtocolError, ServerProxy
 
 RESPONSES = {
     "http://localhost/test_xmlrpc_ok": {
@@ -15,6 +15,32 @@ RESPONSES = {
          <value><int>1</int></value>
       </param>
    </params>
+</methodResponse>""",
+    },
+    "http://localhost/test_xmlrpc_multi_ok": {
+        "status": 200,
+        "body": """<?xml version="1.0"?>
+<methodResponse>
+    <params>
+        <param>
+            <value>
+                <array>
+                    <data>
+                        <value>
+                            <array>
+                                <data><value><int>1</int></value></data>
+                            </array>
+                        </value>
+                        <value>
+                            <array>
+                                <data><value><int>2</int></value></data>
+                            </array>
+                        </value>
+                    </data>
+                </array>
+            </value>
+        </param>
+    </params>
 </methodResponse>""",
     },
     "http://localhost/test_xmlrpc_fault": {
@@ -103,3 +129,15 @@ def test_context_custom():
     ctx = ssl.create_default_context()
     client = ServerProxy("http://nonexistent/nonexistent", context=ctx)
     assert client._session._transport._pool._ssl_context is ctx  # type: ignore
+
+
+async def test_multicall():
+    client = ServerProxy(
+        "http://localhost/test_xmlrpc_multi_ok", session=DummyAsyncClient()
+    )
+    mc = MultiCall(client)
+    mc.name.space.proxfyiedcall()
+    mc.name.space.proxfyiedcall()
+    response = await mc()
+    assert response[0] == 1
+    assert response[1] == 2

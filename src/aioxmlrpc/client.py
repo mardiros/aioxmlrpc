@@ -21,7 +21,7 @@ from xmlrpc import client as xmlrpc
 
 import httpx
 
-__ALL__ = ["ServerProxy", "Fault", "ProtocolError"]
+__ALL__ = ["ServerProxy", "Fault", "ProtocolError", "MultiCall"]
 
 RPCResult = Any
 RPCParameters = Any
@@ -208,3 +208,16 @@ class ServerProxy(xmlrpc.ServerProxy):
 
     def __getattr__(self, name: str) -> _Method:  # type: ignore
         return _Method(self.__request, name)
+
+
+class MultiCall(xmlrpc.MultiCall):
+    __server: ServerProxy
+
+    async def __call__(self) -> xmlrpc.MultiCallIterator:  # type: ignore
+        marshalled_list = []
+        for name, args in self.__call_list:
+            marshalled_list.append({"methodName": name, "params": args})
+
+        return xmlrpc.MultiCallIterator(
+            await self.__server.system.multicall(marshalled_list)
+        )
