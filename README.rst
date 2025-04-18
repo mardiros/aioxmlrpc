@@ -15,11 +15,15 @@ Asyncio version of the standard lib ``xmlrpc``
 ``aioxmlrpc.client``, which works like ``xmlrpc.client`` but uses coroutines,
 has been implemented.
 
-``aioxmlrpc.server``, which works pretty much like ``xmlrpc.server`` but
-can be run in asyncio loop and handle normal remote procedure call (RPC) and remote coroutines call (RCC).
-
-``aioxmlrpc`` is based on ``httpx`` for the transport, and just patch
+``aioxmlrpc.client`` is based on ``httpx`` for the transport, and just patch
 the necessary from the python standard library to get it working.
+
+
+``aioxmlrpc.server``, which works much like ``xmlrpc.server``, but runs on the asyncio
+event loop and handles remote procedure calls (RPC) using both regular functions and coroutines.
+
+
+``aioxmlrpc.server`` is based on ``starlette`` and ``uvicorn`` for handling HTTP.
 
 
 Installation
@@ -31,6 +35,13 @@ tool, example with pip here.
 ::
 
     pip install aioxmlrpc
+
+
+The server dependencies is installed using the extra syntax.
+
+::
+
+   pip install "aioxmlrpc[server]"
 
 
 Getting Started
