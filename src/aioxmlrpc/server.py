@@ -131,7 +131,7 @@ class SimpleXMLRPCServer(SimpleXMLRPCDispatcher):
         addr: Tuple[str, int],
         logRequests: bool = True,
         allow_none: bool = False,
-        encoding: str | None = None,
+        encoding: Optional[str] = None,
         use_builtin_types: bool = False,
     ) -> None:
         super().__init__(allow_none, encoding, use_builtin_types)
@@ -183,14 +183,14 @@ class SimpleXMLRPCServer(SimpleXMLRPCDispatcher):
 
     def __exit__(
         self,
-        exc_type: type[BaseException] | None,
-        exc: BaseException | None,
-        tb: TracebackType | None,
+        exc_type: Optional[type[BaseException]],
+        exc: Optional[BaseException],
+        tb: Optional[TracebackType],
     ) -> None: ...
 
     async def __aexit__(
         self,
-        exc_type: type[BaseException] | None,
-        exc: BaseException | None,
-        tb: TracebackType | None,
+        exc_type: Optional[type[BaseException]],
+        exc: Optional[BaseException],
+        tb: Optional[TracebackType],
     ) -> None: ...
