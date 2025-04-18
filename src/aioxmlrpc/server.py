@@ -11,7 +11,16 @@ Handle RPC of classic and coroutine functions
 import asyncio
 import inspect
 from types import TracebackType
-from typing import Any, Iterable, Tuple
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Coroutine,
+    Iterable,
+    Optional,
+    Tuple,
+    overload,
+)
 from xmlrpc import server
 from xmlrpc.client import loads, dumps, Fault
 
@@ -146,6 +155,25 @@ class SimpleXMLRPCServer(SimpleXMLRPCDispatcher):
         )
         self.server = uvicorn.Server(config)
         return asyncio.create_task(self.server.serve())
+
+    @overload
+    def register_function(  # type: ignore
+        self, function: Callable[..., _Marshallable], name: Optional[str] = None
+    ) -> Callable[..., _Marshallable]: ...
+
+    @overload
+    def register_function(  # type: ignore
+        self,
+        function: Coroutine[Awaitable[_Marshallable], Any, Any],
+        name: Optional[str] = None,
+    ) -> Coroutine[Awaitable[_Marshallable], Any, Any]: ...
+
+    def register_function(  # type: ignore
+        self,
+        function: Any,
+        name: Optional[str] = None,
+    ) -> Any:
+        super().register_function(function, name)
 
     async def __aenter__(self) -> "SimpleXMLRPCServer":
         return self
