@@ -1,3 +1,9 @@
+0.10.0  - Released on 2025-04-18
+--------------------------------
+* Add support of aioxmlrpc.server
+* Add support of MultiCall
+* Fix httpx warning
+
 0.9.1  - Released on 2024-12-06
 -------------------------------
 * Fix for httpx 0.28 (Ondra Geršl)
