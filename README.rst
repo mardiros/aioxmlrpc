@@ -79,17 +79,19 @@ This example show an exemple of the server side.
 
 
    class Api:
-       def info(self):
-           return "1.0.0"
-       @asyncio.coroutine
-       def sleep(self):
-            yield from asyncio.sleep(1)
-            return "done"
+      def info(self):
+         return "1.0.0"
+
+      async def sleep(self):
+         await asyncio.sleep(1)
+         return "done"
+
+
+   async def main():
+      server = SimpleXMLRPCServer(("0.0.0.0", 8080))
+      server.register_instance(Api(), allow_dotted_names=True)
+      await server.serve_forever()
+
 
    if __name__ == "__main__":
-       server = SimpleXMLRPCServer()
-       server.register_instance(Api(), allow_dotted_names=True)
-       loop = asyncio.get_event_loop()
-       f = loop.create_server(lambda: server.request_handler(debug=True, keep_alive=75), '0.0.0.0', '8080')
-       loop.run_until_complete(f)
-       loop.run_forever()
+      asyncio.run(main())
